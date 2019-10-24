@@ -7,13 +7,20 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.core.model.dto.NotificationDTO;
+import com.example.core.presenter.DBManager;
 import com.example.core.service.NotificationCrawlerService;
 import com.example.core.utils.ApiCommUtil;
 
+import org.json.JSONException;
+
+import java.util.ArrayList;
 import java.util.Set;
 
 
@@ -73,6 +80,44 @@ public class MainActivity extends AppCompatActivity {
                 txtApiStatus.setText("데이터 수신중입니다.");
             }
         });
+        //___________________________________________//
+
+
+
+        //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
+        // Database Manager
+        //        데이터베이스 매니저 생성
+//        데이터베이스 파일 실제 위치 : /data/data/앱패키지주소/databases/data.db
+        DBManager database = new DBManager(openOrCreateDatabase("data.db", MODE_PRIVATE, null));  // 데이터베이스 생성, 열기
+
+
+//        새로운 노티를 데이터베이스에 반영하는 예시
+//        try {
+//            database.updateNewNoti("오늘 날씨가 좋군요!!");  // 노티 메시지를 테이블(Notification, Noun)에 업데이트
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//        NOUN 데이터베이스에 추가
+//        database.insertNoun("오늘");
+//        database.insertNoun("날씨");
+//        database.insertNoun("하늘");
+
+//
+//        NOTIFICATION 데이터베이스에 대한 weight값 업데이트
+//        database.updateNotiWeight(1,true);
+//
+//        NOUN 데이터베이스에 대한 weight값 업데이트
+//        database.updateNounWeight(1, true);
+//        database.updateNounWeight("하늘", false);
+//
+//        NOTIFICATION 데이터베이스 정보를 가져옴
+//        ArrayList<NotificationDTO> getData = database.getNotificationList();
+//        for(int i = 0; i < getData.size(); i++){
+//            Log.e("=====", getData.get(i).id + "/ " + getData.get(i).title + "/ " + getData.get(i).msg + "/ " + getData.get(i).weight + "/ " + getData.get(i).isRead + "/ " + getData.get(i).pkgName);
+//        }
+
+
         //___________________________________________//
 
     }
