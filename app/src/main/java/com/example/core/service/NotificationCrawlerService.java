@@ -2,11 +2,9 @@ package com.example.core.service;
 
 import android.app.Notification;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import com.example.core.utils.ApiCommunication;
 
 public class NotificationCrawlerService extends android.service.notification.NotificationListenerService {
     public final static String TAG = "=====";
@@ -107,7 +105,7 @@ public class NotificationCrawlerService extends android.service.notification.Not
 //        protected String doInBackground(Void... voids) {
 //            // 비동기 처리 후 결과값을 리턴
 //            // 이 메소드가 끝난 후에 onPostExecute()가 실행됨
-//            return new ApiCommunication().request(url, sentence);
+//            return new ApiCommUtil().request(url, sentence);
 //        }
 //
 //        @Override

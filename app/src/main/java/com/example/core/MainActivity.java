@@ -7,13 +7,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.core.service.NotificationCrawlerService;
-import com.example.core.utils.ApiCommunication;
+import com.example.core.utils.ApiCommUtil;
 
 import java.util.Set;
 
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
 
         btnApiSend = findViewById(R.id.btnApiSend);
         txtApiStatus = findViewById(R.id.txtApiStatus);
-
 
 
 
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 String url = "http://noti-drawer.run.goorm.io/api/analyze-sentence";
                 String sentence = "{\"sentence\": \"오늘은 치킨 섭취를 먹구 싶어용.\"}";
 
-                GetNounInSentenceAsync getNoun = new GetNounInSentenceAsync(url, sentence);
+                AsyncManager getNoun = new AsyncManager(url, sentence);
                 getNoun.execute();
 
                 btnApiSend.setEnabled(false);
@@ -76,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //___________________________________________//
-
-
 
     }
 
@@ -94,13 +90,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     // API-Communication
-    public class GetNounInSentenceAsync extends AsyncTask<Void, Void, String> {
+    public class AsyncManager extends AsyncTask<Void, Void, String> {
 
         String url;
         String sentence;
 
         // Constructor
-        public GetNounInSentenceAsync(String url, String sentence){
+        public AsyncManager(String url, String sentence){
             this.sentence = sentence;
             this.url = url;
         }
@@ -109,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(Void... voids) {
             // 비동기 처리 후 결과값을 리턴
             // 이 메소드가 끝난 후에 onPostExecute()가 실행됨
-            return new ApiCommunication().request(url, sentence);
+            return new ApiCommUtil().requestJson(url, sentence);
         }
 
         @Override
@@ -126,7 +122,4 @@ public class MainActivity extends AppCompatActivity {
                 txtApiStatus.setText("완료하였습니다.\n" + result);
         }
     }
-
-
-
 }
