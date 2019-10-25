@@ -2,16 +2,25 @@ package com.example.core.service;
 
 import android.app.Notification;
 import android.graphics.drawable.Icon;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.example.core.presenter.DBManager;
+import com.example.core.utils.ApiCommUtil;
+
+import org.json.JSONException;
+
+
 public class NotificationCrawlerService extends android.service.notification.NotificationListenerService {
     public final static String TAG = "=====";
+    DBManager database;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        database = new DBManager(openOrCreateDatabase("data.db", MODE_PRIVATE, null));  // 데이터베이스 생성, 열기
         Log.e(TAG, "onCreate():: ");
     }
 
@@ -44,7 +53,7 @@ public class NotificationCrawlerService extends android.service.notification.Not
         CharSequence bigContentTitle = extras.getCharSequence(Notification.EXTRA_TITLE_BIG);
 
         Icon smallIcon = notification.getSmallIcon();
-        Icon largeIcon = notification.getLargeIcon();
+//        Icon largeIcon = notification.getLargeIcon();
 
         Log.e(TAG, "NotiPosted::  " +
                 " / id : " + sbn.getId() +
@@ -57,19 +66,8 @@ public class NotificationCrawlerService extends android.service.notification.Not
                 " / packageName : " + sbn.getPackageName()
         );
 
-
-
-
-//        // 백엔드 API 테스트용 코드
-//        String url = "http://noti-drawer.run.goorm.io/api/analyze-sentence";
-//        String sentence = "{\"sentence\": \"오늘은 치킨 섭취를 먹구 싶어용.\"}";
-//
-//        GetNounInSentenceAsync getNoun = new GetNounInSentenceAsync(url, sentence);
-//        getNoun.execute();
-
-
-
-
+        AsyncManager dbAsyncTask = new AsyncManager(bigText.toString());
+        dbAsyncTask.execute();
 
     }
 
@@ -84,42 +82,48 @@ public class NotificationCrawlerService extends android.service.notification.Not
         Log.e(TAG, "NotiIRemoved:: " +
                 " packageName: " + sbn.getPackageName() +
                 " id: " + sbn.getId());
+
     }
 
 
 
+    // 비동기 처리
+    public class AsyncManager extends AsyncTask<Void, Void, Void > {
 
-//    // 백엔드 API 테스트용 코드
-//    private class GetNounInSentenceAsync extends AsyncTask<Void, Void, String> {
-//
-//        String url;
-//        String sentence;
-//
-//        // Constructor
-//        public GetNounInSentenceAsync(String url, String sentence){
-//            this.sentence = sentence;
-//            this.url = url;
-//        }
-//
-//        @Override
-//        protected String doInBackground(Void... voids) {
-//            // 비동기 처리 후 결과값을 리턴
-//            // 이 메소드가 끝난 후에 onPostExecute()가 실행됨
-//            return new ApiCommUtil().request(url, sentence);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String result){
-//            super.onPostExecute(result);
-//            // 서버 통신 후 처리 완료
-//            // 받아온 값은 result에 저장되며 JSON 타입으로 저장됨
-//            // 올바르지 못한 값을 받아왔을 때, 빈 String 값이 나옴
-//
-//            if(result.equals(""))
-//                Log.e("=====", "실패하였습니다");
-//            else
-//                Log.e("=====", "완료하였습니다");
-//        }
-//    }
+        String notiMsg;
+        String taskName;
 
+        // Constructor
+        public AsyncManager(String notiMsg){
+            this.notiMsg = notiMsg;
+            taskName = "DB Async Task";
+    }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // 비동기 처리 후 결과값을 리턴
+            // 이 메소드가 끝난 후에 onPostExecute()가 실행됨
+
+            // 여기를 함수형으로 짜면 좋을텐데.. 쩝..
+            Log.e("==="+taskName+"===", "Start");
+            try {
+                database.updateNewNoti(notiMsg);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result){
+            super.onPostExecute(result);
+            // 서버 통신 후 처리 완료
+            // 받아온 값은 result에 저장되며 JSON 타입으로 저장됨
+            // 올바르지 못한 값을 받아왔을 때, 빈 String 값이 나옴
+
+            Log.e("==="+taskName+"===", "Done");
+
+        }
+    }
 }

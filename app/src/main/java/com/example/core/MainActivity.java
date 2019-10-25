@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btnApiSend;
     private TextView txtApiStatus;
+    private DBManager database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,36 +60,31 @@ public class MainActivity extends AppCompatActivity {
         // NotificationListenerService의 경우, Rebind() 메소드 실행 전까지 서비스가 종료되지 않는 것으로 확인됨.
         Intent service = new Intent(getApplicationContext(), NotificationCrawlerService.class);
         startService(service);
-
         //___________________________________________//
 
 
+        // DB Connect
+        database = new DBManager(openOrCreateDatabase("data.db", MODE_PRIVATE, null));  // 데이터베이스 생성, 열기
 
-        //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
-        // API-Communication
+
+        // DB-Test
         btnApiSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String url = "http://noti-drawer.run.goorm.io/api/analyze-sentence";
-                String sentence = "{\"sentence\": \"오늘은 치킨 섭취를 먹구 싶어용.\"}";
-
-                AsyncManager getNoun = new AsyncManager(url, sentence);
-                getNoun.execute();
-
-                btnApiSend.setEnabled(false);
-                txtApiStatus.setText("데이터 수신중입니다.");
+                try {
+                    database.updateNewNoti("오늘 날씨가 좋군요!!");  // 노티 메시지를 테이블(Notification, Noun)에 업데이트
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
-        //___________________________________________//
-
 
 
         //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
         // Database Manager
         //        데이터베이스 매니저 생성
 //        데이터베이스 파일 실제 위치 : /data/data/앱패키지주소/databases/data.db
-        DBManager database = new DBManager(openOrCreateDatabase("data.db", MODE_PRIVATE, null));  // 데이터베이스 생성, 열기
+
 
 
 //        새로운 노티를 데이터베이스에 반영하는 예시
@@ -134,37 +130,38 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    // API-Communication
-    public class AsyncManager extends AsyncTask<Void, Void, String> {
 
-        String url;
-        String sentence;
-
-        // Constructor
-        public AsyncManager(String url, String sentence){
-            this.sentence = sentence;
-            this.url = url;
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            // 비동기 처리 후 결과값을 리턴
-            // 이 메소드가 끝난 후에 onPostExecute()가 실행됨
-            return new ApiCommUtil().requestJson(url, sentence);
-        }
-
-        @Override
-        protected void onPostExecute(String result){
-            super.onPostExecute(result);
-            // 서버 통신 후 처리 완료
-            // 받아온 값은 result에 저장되며 JSON 타입으로 저장됨
-            // 올바르지 못한 값을 받아왔을 때, 빈 String 값이 나옴
-
-            btnApiSend.setEnabled(true);
-            if(result.equals(""))
-                txtApiStatus.setText("실패하였습니다.");
-            else
-                txtApiStatus.setText("완료하였습니다.\n" + result);
-        }
-    }
+//    // API-Communication
+//    public class DBAsyncUtil extends AsyncTask<Void, Void, String> {
+//
+//        String url;
+//        String sentence;
+//
+//        // Constructor
+//        public DBAsyncUtil(String url, String sentence){
+//            this.sentence = sentence;
+//            this.url = url;
+//        }
+//
+//        @Override
+//        protected String doInBackground(Void... voids) {
+//            // 비동기 처리 후 결과값을 리턴
+//            // 이 메소드가 끝난 후에 onPostExecute()가 실행됨
+//            return new ApiCommUtil().requestJson(url, sentence);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String result){
+//            super.onPostExecute(result);
+//            // 서버 통신 후 처리 완료
+//            // 받아온 값은 result에 저장되며 JSON 타입으로 저장됨
+//            // 올바르지 못한 값을 받아왔을 때, 빈 String 값이 나옴
+//
+//            btnApiSend.setEnabled(true);
+//            if(result.equals(""))
+//                txtApiStatus.setText("실패하였습니다.");
+//            else
+//                txtApiStatus.setText("완료하였습니다.\n" + result);
+//        }
+//    }
 }

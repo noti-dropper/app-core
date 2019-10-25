@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.example.core.model.dto.NotificationDTO;
+import com.example.core.utils.ApiCommUtil;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -138,8 +140,14 @@ public class DBManager {
         latestNotification = cursor.getCount();
 
 
+
+        // msg를 JSON 타입으로 변환
+        String tmpJson = "{\"sentence\" : \"" + msg + "\"}";
+
         // 백엔드 API에서 명사 정보를 받아옴
-        JSONObject analyzeAPIResult = null;      // 명사 분석 결과값 테스트셋 TODO: analyzeAPIResult = api.get("/api/analyze")
+        tmpJson = new ApiCommUtil().requestJson("http://noti-drawer.run.goorm.io/api/analyze-sentence", tmpJson);
+
+        JSONObject analyzeAPIResult = new JSONObject(tmpJson);      // 명사 분석 결과값 테스트셋 :: analyzeAPIResult = api.get("/api/analyze")
         JSONArray compare = analyzeAPIResult.getJSONArray("result");
 
         for(int i = 0; i < compare.length(); i++){
@@ -222,14 +230,16 @@ public class DBManager {
         Log.e("====22====", makeJSONTmp);
 
 
-        JSONObject apiSimilarSend = new JSONObject(makeJSONTmp);
-
         // API로 유사도를 받아옴
         // apiSimilarSend를 보냄
         // similarityAPIResult를 받음
         // request_noun -> similarSample
         // total_nouns -> nounDBTotal, nounDBTotalWeight
-        JSONObject similarityAPIResult = null;   // 유사도 결과값  테스트셋  TODO: similarityAPIResult = api.get("/api/similarity")
+
+        tmpJson = new ApiCommUtil().requestJson("http://noti-drawer.run.goorm.io/api/similarity-analysis", makeJSONTmp);
+        Log.e("====22====", tmpJson);
+
+        JSONObject similarityAPIResult = new JSONObject(tmpJson);   // 유사도 결과값  테스트셋 :: similarityAPIResult = api.get("/api/similarity")
 
 
         double totalWeight = 0.0;
@@ -247,6 +257,9 @@ public class DBManager {
             totalWeight = 0.0;
         }
         cursor.close();
+
+        Log.e("=====", "Done to add");
+
     }
 
 }
